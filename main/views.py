@@ -1,72 +1,47 @@
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login as auth_login
-from django.contrib.auth import logout as auth_logout
-from django.http import HttpResponse
+from django.contrib.auth import authenticate, login as LogIn
+from django.contrib.auth import logout as LogOut
 from django.shortcuts import render
 from django.shortcuts import redirect
-from .models import Task
-from django.conf import settings
+from .models import List
 
-# Create your views here.
+def signout(request):
+    LogOut(request)
+    return redirect(signin)
 
-def index(request):
-    if not request.user.is_authenticated:
-        return redirect(login)
-
-    id = request.user.id
-    name = request.user.first_name
-    tasks = Task.objects.filter(user_id=id)
-    return render(request, 'main/index.html', {'user_name' : name, 'tasks': tasks})
-
-
-
-
-def login(request):
-
+def signin(request):
     if request.method == 'POST':
         user = authenticate(request, username=request.POST['email'], password=request.POST['password'])
-        auth_login(request, user)
+        LogIn(request, user)
         return redirect(index)
+    return render(request, 'main/sign.html')
 
-    return render(request, 'main/authorize.html')
-
-
-
-
-def logout(request):
-
-    auth_logout(request)
-    return redirect(login)
-
-
-
-
-def register(request):
-
+def signup(request):
     if request.method == 'POST':
-
         name = request.POST.get('name')
         email = request.POST.get('email')
         password = request.POST.get('pass')
-
-        new_user = User.objects.create_user(username=email,email=email, first_name=name,password=password)
-        new_user.save()
-
+        user2 = User.objects.create_user(username=email,email=email, first_name=name,password=password)
+        user2.save()
         user = authenticate(request, username=email, password=password)
-        auth_login(request, user)
+        LogIn(request, user)
         return redirect('/')
 
-
-def addTask(request):
-    if request.method == 'POST':
-        user_id = request.user.id
-        title = request.POST['title']
-        new_task = Task(title=title, user_id=user_id)
-        new_task.save()
-
-        return redirect('/')
-
-
-def deleteTask(request, task_id):
-    Task.objects.get(id=task_id).delete()
+def deleteItem(request, item_id):
+    List.objects.get(id=item_id).delete()
     return redirect('/')
+
+def add(request):
+    if request.method == 'POST':
+        id = request.user.id
+        name = request.POST['name']
+        new_item = List(title=name, user_id=id)
+        new_item.save()
+        return redirect('/')
+
+def index(request):
+    if not request.user.is_authenticated:
+        return redirect(signin)
+    id = request.user.id
+    items = List.objects.filter(user_id=id)
+    return render(request, 'main/index.html', {'items': items})

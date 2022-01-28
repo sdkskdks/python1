@@ -3,10 +3,10 @@ from . import views
 
 urlpatterns = [
     path('', views.index),
-    path('login',views.login),
-    path('logout', views.logout),
-    path('register',views.register),
+    path('signin', views.signin),
+    path('signout', views.signout),
+    path('signup', views.signup),
 
-    path('addTask', views.addTask),
-    path('deleteTask/<int:task_id>', views.deleteTask)
+    path('add', views.add),
+    path('remove/<int:item_id>', views.deleteItem)
 ]
